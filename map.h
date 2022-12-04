@@ -3,51 +3,26 @@
 //#ifndef MAP_H_
 //#define MAP_H_
 
-#define MAP_HEIGHT 25 //tiles
-#define MAP_WIDTH 40 //tiles
 
-#define TILE_WIDTH 50 //tiles
-#define TILE_HEIGHT 68 //tiles
-
-//TODO: Проверять пересечения обьектов на карте друг с другом и с картой (тут или в мэйне)
 class Map {
 	public:
 		//Map(const std::string &filename);
-		Map(const std::string filename);
+		Map(const std::string filename, const int mapWidth, const int mapHeight);
 
         sf::Texture texture;
         sf::Sprite sprite;
 
-		sf::String TileMap[MAP_HEIGHT] = {
-        "0000000000000000000000000000000000000000",
-        "0                                      0",
-        "0  s                                   0",
-        "0                                      0",
-        "0     s                                0",
-        "0                                      0",
-        "0                                      0",
-        "0                                      0",
-        "0                                      0",
-        "0                                      0",
-        "0                                      0",
-        "0                                      0",
-        "0                                      0",
-        "0                                      0",
-        "0                                      0",
-        "0                                      0",
-        "0                                      0",
-        "0                                      0",
-        "0                                      0",
-        "0                                      0",
-        "0                                      0",
-        "0                                      0",
-        "0                                      0",
-        "0                                      0",
-        "0000000000000000000000000000000000000000",
-    };
+        sf::Image mapImage;//объект изображения для карты
 
-		void mapRender(sf::RenderWindow* window);
+        int mapHeight = 25; //tiles
+        int mapWidth = 40; //tiles
 
-		//void mapRender(sf::RenderWindow* window);
+        int tileWidth = 50;
+        int tileHeight = 68;
+
+		sf::String** tileMap;
+        
+		void mapRender(sf::RenderWindow& window);
+        void mapInit();
 };
 //#endif

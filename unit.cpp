@@ -133,12 +133,8 @@ void Unit::updatePos(float time) {
     this->lineToDest->setScale(vector2fLen(this->dest_pos - pos) / initial_fig.x, 1); // От центра до курсора, стандартная ширина
     
     this->freeMovingTime--;
-    if (this->freeMovingTime <= 0 and this->isMoving) 
+    if (this->freeMovingTime <= 0 && this->isMoving) 
         this->reCalcMove();
-    //my_unit.pos_x = pos.x - dx;//двигаем спрайт по Х
-    //my_unit.pos_y = pos.y - dy;//двигаем по Y
-            //p.sprite.setPosition(pos.x - dX, pos.y - dY);//можно и так написать,если у вас нету х и у в классе игрока
-
 }
 
 void Unit::update(sf::RenderWindow& window, const float time)

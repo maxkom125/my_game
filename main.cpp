@@ -3,6 +3,11 @@
 
 #include "unit.h"
 #include "map.h" //подключили код с картой
+
+#define MAP_WIDTH 12 //tiles
+#define MAP_HEIGHT 9 // tiles
+
+
 void runIntoWall(const float& diff, float& velocity, float& pos, Unit*& unit, const int& wallPos) {
     if (velocity > 0)
         pos -= diff;
@@ -14,7 +19,6 @@ void runIntoWall(const float& diff, float& velocity, float& pos, Unit*& unit, co
         velocity = 0;
 
     unit->freeMovingTime = 0;
-    std::cout << "errr 0" << std::endl;
 }
 
 void interactionWithMap(Unit* unit, Map* map)//ф-ция взаимодействия с картой
@@ -29,17 +33,17 @@ void interactionWithMap(Unit* unit, Map* map)//ф-ция взаимодейст�
         // Массив2д в классе, 
         // Get all tiles that intersects with input) area
         //проходимся по тайликам, контактирующим с игроком, то есть по всем квадратикам. про условия читайте ниже.
-        //std::cout << unitBotRightPoint.y / TILE_HEIGHT + 1 - (unitTopLeftPoint.y / TILE_HEIGHT - 1) << " " << 
-        //unitBotRightPoint.x / TILE_WIDTH + 1 - unitTopLeftPoint.x / TILE_WIDTH << std::endl;
-		for (int i = unitTopLeftPoint.y / TILE_HEIGHT; i <= unitBotRightPoint.y / TILE_HEIGHT; i++) // TODO: CHECK (float->int, +-1)
-        	for (int j = unitTopLeftPoint.x / TILE_WIDTH; j <= unitBotRightPoint.x / TILE_WIDTH; j++)//икс делим на 32, тем самым получаем левый квадратик, с которым персонаж соприкасается. (он ведь больше размера 32*32, поэтому может одновременно стоять на нескольких квадратах). А j<(x + w) / 32 - условие ограничения координат по иксу. то есть координата самого правого квадрата, который соприкасается с персонажем. таким образом идем в цикле слева направо по иксу, проходя по от левого квадрата (соприкасающегося с героем), до правого квадрата (соприкасающегося с героем)
+        //std::cout << unitBotRightPoint.y / map->tileHeight + 1 - (unitTopLeftPoint.y / map->tileHeight - 1) << " " << 
+        //unitBotRightPoint.x / map->tileWidth + 1 - unitTopLeftPoint.x / map->tileWidth << std::endl;
+		for (int i = unitTopLeftPoint.y / map->tileHeight; i <= unitBotRightPoint.y / map->tileHeight; i++) // TODO: CHECK (float->int, +-1)
+        	for (int j = unitTopLeftPoint.x / map->tileWidth; j <= unitBotRightPoint.x / map->tileWidth; j++)//икс делим на 32, тем самым получаем левый квадратик, с которым персонаж соприкасается. (он ведь больше размера 32*32, поэтому может одновременно стоять на нескольких квадратах). А j<(x + w) / 32 - условие ограничения координат по иксу. то есть координата самого правого квадрата, который соприкасается с персонажем. таким образом идем в цикле слева направо по иксу, проходя по от левого квадрата (соприкасающегося с героем), до правого квадрата (соприкасающегося с героем)
 			{
-                tileTopLeftPoint  = sf::Vector2f(j * TILE_WIDTH, i * TILE_HEIGHT);
-                tileBotRightPoint = sf::Vector2f((j + 1) * TILE_WIDTH - 1, (i + 1) * TILE_HEIGHT - 1);
+                tileTopLeftPoint  = sf::Vector2f(j * map->tileWidth, i * map->tileHeight);
+                tileBotRightPoint = sf::Vector2f((j + 1) * map->tileWidth - 1, (i + 1) * map->tileHeight - 1);
                 //std::cout << j << " " << i << std::endl;
                 //std::cout << unitTopLeftPoint.x << " " << unitTopLeftPoint.y << std::endl;
                 //std::cout << tileTopLeftPoint.x << " " << tileTopLeftPoint.y << std::endl;
-				if (map->TileMap[i][j] == '0' || map->TileMap[i][j] == 's')//если наш квадратик соответствует символу 0 (стена), то проверяем "направление скорости" персонажа:
+				if (map->tileMap[i][j] == '0' || map->tileMap[i][j] == 's')//если наш квадратик соответствует символу 0 (стена), то проверяем "направление скорости" персонажа:
 				{
                     // if (unit->velocity.y > 0) check   bot point else check  top point
                     // if (unit->velocity.x > 0) check right point else check left point
@@ -71,17 +75,16 @@ void interactionWithMap(Unit* unit, Map* map)//ф-ция взаимодейст�
                     }
 				}
  
-				if (0 && map->TileMap[i][j] == 's') { //если символ равен 's' (камень)
+				if (0 && map->tileMap[i][j] == 's') { //если символ равен 's' (камень)
 					unit->pos = sf::Vector2f(450, 450); //какое то действие... например телепортация героя
                     unit->freeMovingTime = 0;
-					map->TileMap[i][j] = ' ';//убираем камень, типа взяли бонус. можем и не убирать, кстати.
+					map->tileMap[i][j] = ' ';//убираем камень, типа взяли бонус. можем и не убирать, кстати.
 				}
 			}
 	}
 int main()
 {
-    
-    Unit my_unit(100, TILE_WIDTH * 4, TILE_HEIGHT * 3);
+    Unit myUnit(100, 100, 100);
 
     sf::RenderWindow window(sf::VideoMode(600, 600), "SFML works!"); //, Style::Fullscreen
     window.setFramerateLimit(144);
@@ -89,11 +92,9 @@ int main()
     sf::CircleShape shape(100.f);
     shape.setFillColor(sf::Color::Green);
 
-    float dx, dy;
-
     sf::Clock clock;
 
-    Map map("img/map.png");
+    Map map("img/map.png", MAP_WIDTH, MAP_HEIGHT);
 
     while (window.isOpen())
     {
@@ -115,38 +116,31 @@ int main()
         //std::cout << pos.x << "\n";//смотрим на Х,которая преобразовалась в мировые координаты
         if (event.type == sf::Event::MouseButtonPressed)//если нажата клавиша мыши
             if (event.key.code == sf::Mouse::Left)//а именно левая
-                if (my_unit.contains(mousePos.x, mousePos.y)) { //и при этом координата курсора попадает в спрайт
-                    my_unit.leftClicked();
+                if (myUnit.contains(mousePos.x, mousePos.y)) { //и при этом координата курсора попадает в спрайт
+                    myUnit.leftClicked();
                 }
 
         if (event.type == sf::Event::MouseButtonPressed)//если отпустили клавишу
 			if (event.key.code == sf::Mouse::Right) { //а именно левую
-                sf::Vector2f spriteTopLeftPixelDest = sf::Vector2f(mousePos.x - my_unit.getSize().x / 2, mousePos.y - my_unit.getSize().y / 2);
-                if (my_unit.isSelected) {
-                    my_unit.isSelected = false;
-                    my_unit.sprite.setColor(sf::Color::White);//красим спрайт обратно
+                sf::Vector2f spriteTopLeftPixelDest = sf::Vector2f(mousePos.x - myUnit.getSize().x / 2, mousePos.y - myUnit.getSize().y / 2);
+                if (myUnit.isSelected) {
+                    myUnit.isSelected = false;
+                    myUnit.sprite.setColor(sf::Color::White);//красим спрайт обратно
 
-                    my_unit.startMove(spriteTopLeftPixelDest);
+                    myUnit.startMove(spriteTopLeftPixelDest);
                 }
             }
-        interactionWithMap(&my_unit, &map);
+        interactionWithMap(&myUnit, &map);
 
-        my_unit.update(window, time);
+        myUnit.update(window, time);
 
         window.clear();
 
-        map.mapRender(&window);//рисуем квадратики на экран
+        map.mapRender(window);//рисуем квадратики на экран
         
-        my_unit.draw(window);
+        myUnit.draw(window);
         window.display();
     }
 
     return 0;
 }
-
-/*
-        if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) // если (Мышка::нажата клавиша(ЛКМ))
-            {
-            //if (IntRect(x, y, ширина x, высота y).contains(Mouse::getPosition(window))) { num = 1 }
-            }
-*/
